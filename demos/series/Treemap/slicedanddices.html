@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Treemap con Canvas</title>
+</head>
+<body onload="draw();">
+  <canvas id="myCanvas" width="800" height="600"></canvas>
+
+  <script>
+    var valors = [10, 5, 30, 20, 10];
+    var etiquetes = ["cuina", "menjador", "lavabo1", "lavabo2", "habitacio"];
+
+    function draw() {
+      if (valors.length == etiquetes.length) {
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        const sumaValors = valors.reduce((total, valor) => total + valor, 0);
+
+        const resultado = valors.map((valor, index) => ({ nombre: etiquetes[index], valor: valor }))
+          .sort((a, b) => b.valor - a.valor);
+
+        var amplada = canvas.width;
+        var alçada = canvas.height;
+        var y = 0;
+
+        for (var i = 0; i < resultado.length; i++) {
+          var percentatge = resultado[i].valor / sumaValors ;
+          var mida_corresponent = alçada * percentatge;
+          ctx.beginPath();
+          ctx.fillStyle = "blue";
+          ctx.fillRect(0, y, amplada, y + mida_corresponent);
+          
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(0, y, amplada, y +mida_corresponent);
+
+
+          ctx.fillStyle = "white";
+          ctx.font = "16px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          ctx.fillText(resultado[i].nombre, amplada / 2, y + mida_corresponent / 2);
+
+          ctx.stroke();
+
+          y += mida_corresponent;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
