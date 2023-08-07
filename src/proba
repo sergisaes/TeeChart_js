@@ -1,0 +1,163 @@
+Tee.Treemap = function (data, options) {
+    var treemap = Object.create(Tee.CustomSeries.prototype);
+  
+    treemap.data = data;
+    treemap.format = new Tee.Format();
+   
+  
+    treemap.draw = function () {
+      var c = this.chart.ctx;
+  
+      if (this.data && this.data.root) {
+        var root = this.data.root;
+        var totalValue = root.value;
+        var rect = new Tee.Rectangle(0, 0, this.chart.width, this.chart.height);
+  
+        this.drawNode(c, root, rect, totalValue);
+      }
+  
+   
+    };
+  
+    treemap.drawNode = function (c, node, rect, totalValue) {
+      if (node.children && node.children.length > 0) {
+        var a = this.mandatoryAxis, nm = this.notmandatory;
+        var x = rect.x, y = rect.y;
+        var width = rect.width, height = rect.height;
+  
+        var childrenSum = node.children.reduce(function (sum, child) {
+          return sum + child.value;
+        }, 0);
+  
+        for (var i = 0; i < node.children.length; i++) {
+          var child = node.children[i];
+  
+          var childWidth = (child.value / childrenSum) * width;
+          var childHeight = (child.value / totalValue) * height;
+  
+          var childRect = new Tee.Rectangle(x, y, childWidth, childHeight);
+          this.drawNode(c, child, childRect, totalValue);
+  
+          if (a.horizontal) {
+            x += childWidth;
+          } else {
+            y += childHeight;
+          }
+        }
+      } else {
+        var fill = this.getFill(node.index, this.format);
+  
+        c.fillStyle = fill;
+        c.fillRect(rect.x, rect.y, rect.width, rect.height);
+  
+        
+      }
+    };
+  
+   
+  
+    return treemap;
+  };
+  
+
+  Tee.Sliced = function (values, labels) {
+    Tee.Series.call(this, values, labels);
+  
+    this.draw = function () {
+      var c = this.chart.ctx;
+  
+      if (this.data && this.data.values && this.data.labels) {
+        var values = this.data.values;
+        var labels = this.data.labels;
+        var total = values.reduce((total, value) => total + value, 0);
+  
+        var sortedMap = values.map((value, index) => ({
+          value: value,
+          label: labels[index]
+        })).sort((a, b) => b.value - a.value);
+  
+        var y = 0;
+        var canvasHeight = this.chart.height;
+  
+        for (var i = 0; i < sortedMap.length; i++) {
+          var item = sortedMap[i];
+          var percentage = item.value / total;
+          var mida_corresponent = percentage * canvasHeight;
+  
+          c.beginPath();
+  
+          c.fillStyle = this.getFill(i, this.format);
+          c.fillRect(0, y, this.chart.width, y +mida_corresponent);
+  
+          c.strokeStyle = "black";
+            c.lineWidth = 2;
+            c.strokeRect(0, y,this.chart.width, y +mida_corresponent);
+  
+            c.closePath();
+    
+          c.fillStyle = "white";
+          c.font = "16px Arial";
+          c.textAlign = "center";
+          c.textBaseline = "middle";
+          c.fillText(item.label, this.chart.width / 2, (y + mida_corresponent/ 2));
+  
+          c.stroke();
+  
+          y += mida_corresponent;
+        }
+      }
+    };
+  };
+  
+  Tee.Sliced.prototype = new Tee.Series();
+
+  Tee.Treemap = function (data, options) {
+    Tee.CustomSeries.call(this, data, options);
+  
+    this.draw = function () {
+      var c = this.chart.ctx;
+  
+      if (this.data && this.data.root) {
+        var root = this.data.root;
+        var rect = new Tee.Rectangle(0, 0, this.chart.width, this.chart.height);
+  
+        this.drawNode(c, root, rect);
+      }
+    };
+  
+    this.drawNode = function (c, node, rect) {
+      if (node.children && node.children.length > 0) {
+        var totalValue = node.children.reduce(function (sum, child) {
+          return sum + child.value;
+        }, 0);
+    
+        var x = rect.x, y = rect.y, width = rect.width, height = rect.height;
+    
+        for (var i = 0; i < node.children.length; i++) {
+          var child = node.children[i];
+    
+          var childWidth = (child.value / totalValue) * width;
+          var childHeight = (child.value / totalValue) * height;
+    
+          var childRect = new Tee.Rectangle(x, y, childWidth, childHeight);
+          this.drawNode(c, child, childRect);
+    
+          if (rect.width > rect.height) {
+            x += childWidth;
+            width -= childWidth;
+          } else {
+            y += childHeight;
+            height -= childHeight;
+          }
+        }
+      } else {
+        var fill = this.getFill(node.index, this.format);
+    
+        c.fillStyle = fill;
+        c.fillRect(rect.x, rect.y, rect.width, rect.height);
+      }
+    };
+  }  
+  
+  Tee.Treemap.prototype = new Tee.CustomSeries();
+  
