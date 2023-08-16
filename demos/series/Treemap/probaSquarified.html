@@ -30,15 +30,27 @@
 <script type="text/javascript">
 var Chart1;
 function draw() {
-    var valors = [10,20,30,50,20,10];
-var etiquetes = ["cuina","lavabo","menjador","habitacio","rentadora","tele"];
+    const data = {
+            name: 'Root',
+            children: [
+                { name: 'A', value: 40 },
+                { name: 'B', value: 30 },
+                {
+                    name: 'C',
+                    children: [
+                        { name: 'E', value: 15 },
+                        { name: 'F', value: 10 }
+                    ]
+                }
+            ]
+        };
 
 var canvas = document.getElementById("canvas");
 Chart1=new Tee.Chart("canvas");
-var slicedSeries = new Tee.Sliced(valors, etiquetes);
-Chart1.addSeries(slicedSeries);
-slicedSeries.format.fill = "blue";
-slicedSeries.format.gradient.visible = true;
+var squarifiedSeries = new Tee.Treemap(data);
+Chart1.addSeries(squarifiedSeries);
+
+squarifiedSeries.format.gradient.visible = true;
 
 Chart1.draw();
 

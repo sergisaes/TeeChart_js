@@ -9733,7 +9733,7 @@ function twoFingersZoom(chart,zoom){
 
 
 Tee.Sliced = function(o, o2) {  //1r algortime de treemap
-  Tee.CustomSeries.call(this,o,o2);
+  Tee.Series.call(this,o,o2);
   
   this.useAxes=false;
   this.draw = function() {
@@ -9750,7 +9750,8 @@ Tee.Sliced = function(o, o2) {  //1r algortime de treemap
       })).sort((a, b) => b.value - a.value);
 
       var y = 0;
-      var canvasHeight = this.chart.height;
+      var canvasHeight = this.chart.chartRect.height;
+      var canvasWidth = this.chart.chartRect.width;
 
       for (var i = 0; i < sortedMap.length; i++) {
         var item = sortedMap[i];
@@ -9759,11 +9760,11 @@ Tee.Sliced = function(o, o2) {  //1r algortime de treemap
 
         ctx.beginPath();
         ctx.fillStyle = this.getFill(i, this.format);
-        ctx.fillRect(0, y, this.chart.width, y + mida_corresponent);
+        ctx.fillRect(0, y, canvasWidth, y + mida_corresponent);
 
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
-        ctx.strokeRect(0, y, this.chart.width, y + mida_corresponent);
+        ctx.strokeRect(0, y, canvasWidth, y + mida_corresponent);
 
         ctx.closePath();
 
@@ -9771,7 +9772,7 @@ Tee.Sliced = function(o, o2) {  //1r algortime de treemap
         ctx.font = "16px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(item.label, this.chart.width / 2, y + mida_corresponent / 2);
+        ctx.fillText(item.label, canvasWidth / 2, y + mida_corresponent / 2);
 
         ctx.stroke();
 
@@ -9782,4 +9783,72 @@ Tee.Sliced = function(o, o2) {  //1r algortime de treemap
   };
 };
 
-Tee.Sliced.prototype = new Tee.CustomSeries();
+Tee.Sliced.prototype = new Tee.Series();
+
+
+Tee.Treemap = function(o, o2) {
+    Tee.Series.call(this, o, o2);
+    this.palette=new Tee.Palette([ "#4466a3", "#f39c35", "#f14c14", "#4e97a8", "#2b406b",
+                "#1d7b63", "#b3080e", "#f2c05d", "#5db79e", "#707070",
+                "#f3ea8d", "#b4b4b4"]);
+    this.useAxes = false;
+    this.drawNode = function(ctx,node, x, y, width, height, n){
+      
+        if (!node || node.length === 0) {
+          return;
+      }
+        const children = node.children;
+
+        
+        let posy = y;
+        let xoffset = x;
+
+        ctx.beginPath();
+        ctx.fillStyle = this.palette.get(n);
+        ctx.fillRect(xoffset, posy, width - xoffset, height - posy);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(xoffset, posy, width - xoffset, height - posy);
+        ctx.fillStyle = "white";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.name, x + width / 2, posy + 5);
+
+        if(children == null) return;
+        
+        const childHeight = ((height - posy)- 10 * 2) / children.length;
+        posy += 10;
+        xoffset += 10;
+        
+        for (const child of children) {
+            
+            this.drawNode(ctx,child, xoffset, posy, width - xoffset, childHeight + posy, ++n);
+            posy += childHeight;
+        }
+      }
+    
+    this.draw = function() {
+      
+        
+            var ctx = this.chart.ctx;
+          
+            var root = o;
+
+
+            var y = 0;
+            var canvasHeight = this.chart.chartRect.height;
+            var canvasWidth = this.chart.chartRect.width;
+            
+
+            
+
+
+            this.drawNode(ctx,root, 0, y, canvasWidth, canvasHeight,0);
+
+            
+        
+    };
+};
+
+Tee.Treemap.prototype = new Tee.Series();

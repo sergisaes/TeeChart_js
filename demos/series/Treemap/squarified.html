@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treemap Example</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="treemapCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('treemapCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const data = {
+            name: 'Root',
+            children: [
+                { name: 'A', value: 40 },
+                { name: 'B', value: 30 },
+                {
+                    name: 'C',
+                    children: [
+                        { name: 'E', value: 15 },
+                        { name: 'F', value: 10 }
+                    ]
+                }
+            ]
+        };
+        
+        function drawTreemap(node, x, y, width, height) {
+            const children = node.children;
+            
+            if (!node || node.length === 0) {
+                return;
+            }
+            
+            let posy = y;
+            let xoffset = x;
+
+            // Dibuja el nodo actual
+            ctx.beginPath();
+            ctx.fillStyle = getRandomColor();
+            ctx.fillRect(xoffset, posy, width - xoffset, height - posy);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(xoffset, posy, width - xoffset, height - posy);
+            ctx.fillStyle = "white";
+            ctx.font = "16px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(node.name, x + width / 2, posy + 5);
+            
+
+            
+            
+            // Calcula la altura de cada hijo
+            if(children == null) return;
+            const childHeight = ((height - posy)- 10 * 2) / children.length;
+            posy += 10;
+            xoffset += 10;
+            for (const child of children) {
+                
+                drawTreemap(child, xoffset, posy, width - xoffset, childHeight + posy);
+                posy += childHeight;
+            }
+        }
+        
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        drawTreemap(data, 0, 0, canvas.width, canvas.height);
+    </script>
+</body>
+</html>
+
+
