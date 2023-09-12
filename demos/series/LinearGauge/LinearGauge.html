@@ -30,28 +30,16 @@
 <script type="text/javascript">
 var Chart1;
 function draw() {
-    const data = {
-            name: 'Root',
-            children: [
-                { name: 'A', value: 40 },
-                { name: 'B', value: 30 },
-                {
-                    name: 'C',
-                    children: [
-                        { name: 'E', value: 15 },
-                        { name: 'F', value: 10 }
-                    ]
-                }
-            ]
-        };
 
+var inici = 50;
+var data = 75;
 var canvas = document.getElementById("canvas");
 Chart1=new Tee.Chart("canvas");
-var squarifiedSeries = new Tee.Treemap(data);
-Chart1.addSeries(squarifiedSeries);
+var lineargauge = new Tee.LinearGauge(inici,data);
+Chart1.addSeries(lineargauge);
 
-squarifiedSeries.format.gradient.visible = true;
-squarifiedSeries.format.textAlign = "center";
+lineargauge.animation = true;
+
 Chart1.draw();
 
 }

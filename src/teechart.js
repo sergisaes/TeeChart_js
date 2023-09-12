@@ -9792,6 +9792,8 @@ Tee.Treemap = function(o, o2) {
                 "#1d7b63", "#b3080e", "#f2c05d", "#5db79e", "#707070",
                 "#f3ea8d", "#b4b4b4"]);
     this.useAxes = false;
+
+    
     this.drawNode = function(ctx,node, x, y, width, height, n){
       
         if (!node || node.length === 0) {
@@ -9811,9 +9813,18 @@ Tee.Treemap = function(o, o2) {
         ctx.strokeRect(xoffset, posy, width - xoffset, height - posy);
         ctx.fillStyle = "white";
         ctx.font = "16px Arial";
-        ctx.textAlign = "center";
+        ctx.textAlign = this.format.textAlign;
         ctx.textBaseline = "middle";
-        ctx.fillText(node.name, x + width / 2, posy + 5);
+        if(ctx.textAlign == "center"){
+          ctx.fillText(node.name, x + width / 2, posy + 10);
+        }
+        else if (ctx.textAlign == "left"){
+          ctx.fillText(node.name, x, posy + 10);
+        }
+        else if (ctx.textAlign == "right"){
+          ctx.fillText(node.name,  width - x, posy + 10);
+        }
+        
 
         if(children == null) return;
         
@@ -9852,3 +9863,64 @@ Tee.Treemap = function(o, o2) {
 };
 
 Tee.Treemap.prototype = new Tee.Series();
+
+Tee.LinearGauge = function(o, o2){
+  Tee.Series.call(this, o, o2);
+  this.useAxes = false;
+
+  this.drawBar = function(value, ctx, gaugeX, gaugeY,gradient,gaugeHeight,gaugeWidth){
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(gaugeX, gaugeY, gaugeWidth * (value / 100), gaugeHeight);
+
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(gaugeX, gaugeY, gaugeWidth, gaugeHeight);
+
+    for (let i = 0; i <= 100; i += 25) {
+      const x = gaugeX + (gaugeWidth * i / 100);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x, gaugeY - 5, 2, gaugeHeight + 10);
+      ctx.fillText(`${i}%`, x - 10, gaugeY - 10);
+    }
+  }
+
+  this.animateGauge = function(currentValue, targetValue,gradient,gaugeX,gaugeY,gaugeWidth,gaugeHeight,ctx){
+    if (currentValue < targetValue) {
+      currentValue += 1;
+      
+      this.drawBar(currentValue, ctx, gaugeX, gaugeY,gradient,gaugeHeight,gaugeWidth);
+      requestAnimationFrame(() => this.animateGauge(currentValue, targetValue,gradient,gaugeX,gaugeY,gaugeWidth,gaugeHeight,ctx));
+    }
+  }
+
+  this.draw = function() {
+
+  var value = o;
+  var ctx = this.chart.ctx;
+  var height = this.chart.chartRect.height;
+  var width = this.chart.chartRect.width;
+  var gaugeWidth = width - 20;
+  var gaugeHeight = 30;
+  var gaugeX = 10;
+  var gaugeY = (height - gaugeHeight) / 2;
+
+ 
+ 
+
+  const gradient = ctx.createLinearGradient(0, 0, gaugeWidth, 0);
+  gradient.addColorStop(0, 'red');
+  gradient.addColorStop(1, 'green');
+
+
+    if (this.animation == true) {
+      let currentValue = value;
+      const targetValue = o2;
+      this.animateGauge(currentValue, targetValue,gradient,gaugeX,gaugeY,gaugeWidth,gaugeHeight,ctx);
+    } else {
+      this.drawBar(value, ctx, gaugeX, gaugeY,gradient,gaugeHeight,gaugeWidth);
+    }
+  }
+}
+
+Tee.LinearGauge.prototype = new Tee.Series();

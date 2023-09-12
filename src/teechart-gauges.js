@@ -744,3 +744,4 @@ Tee.CircularGauge.prototype.setChart=function(series,chart) {
 }
 
 })();
+
